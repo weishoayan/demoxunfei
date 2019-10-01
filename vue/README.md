@@ -1,0 +1,1 @@
+vue基础项目，以此做vue组件化,包括vueRouter，vuex,axios,webpack,babel

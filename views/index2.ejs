@@ -1,0 +1,764 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-touch-fullscreen" content="YES">
+	<meta name="format-detection" content="telephone=no">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="pragram" content="no-cache">
+	<title>语音导航</title>
+	<style>
+		html {
+			font-size: calc(100vw / 6.4) !important;
+			font-family: "Microsoft YaHei";
+			-webkit-user-select: none;
+			user-select: none;
+		}
+
+		body {
+			background-color: #eaeaeb;
+			margin: 0;
+			padding: 0;
+			/*color: #333233;*/
+			color: #3d3c3d;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.fullscreen-bg {
+			background-position: 50% 50%;
+			background-size: cover;
+			bottom: 0;
+			right: 0;
+			position: fixed;
+			position: absolute\9;
+			width: 100%\9;
+			height: 100%\9;
+			overflow: hidden;
+			left: 0;
+			top: 0;
+			/* background-image: url('images/bg3.png'); */
+		}
+
+		a {
+			color: #777777;
+		}
+
+		div {
+			margin: 0;
+			padding: 0;
+			font-size: 0.1rem;
+		}
+
+		span {
+			font-size: 0.24rem;
+			line-height: 0.4rem;
+		}
+
+		.span_b {
+			font-size: 0.26rem;
+			font-weight: bold;
+		}
+
+		.el-tag {
+			background-color: rgba(64, 158, 255, .1);
+			display: inline-block;
+			padding: 0 10px;
+			height: 32px;
+			line-height: 30px;
+			font-size: 12px;
+			color: #409eff;
+			border-radius: 4px;
+			box-sizing: border-box;
+			border: 1px solid rgba(64, 158, 255, .2);
+			white-space: nowrap;
+		}
+
+		.el-tag--info {
+			background-color: hsla(220, 4%, 58%, .1);
+			border-color: hsla(220, 4%, 58%, .2);
+			color: #909399;
+		}
+
+		.el-tag--success {
+			background-color: rgba(103, 194, 58, .1);
+			border-color: rgba(103, 194, 58, .2);
+			color: #67c23a;
+		}
+
+		.wrap-btn {
+			position: fixed;
+			height: 190px;
+			text-align: center;
+			width: 100%;
+			bottom: 0;
+			z-index: 1;
+			background: url('images/touming.png') no-repeat 50% 50%;
+			background-size: 115%;
+		}
+
+		.wrap-btn div {
+			position: absolute;
+			top: 50%;
+			left: 35%;
+			width: 30%;
+			/* margin: 0 auto; */
+		}
+	</style>
+	<script>
+		window.onload = function () {
+			getHeight();
+		}
+		function getHeight() {
+			var height = document.documentElement.clientHeight;
+			var company = document.getElementById('main_body');
+			company.style.height = height + 'px';
+			var bj = document.getElementById('bj');
+			var mkbtn = document.getElementById('mkbtn');
+			bj.style.display = "block";
+			mkbtn.style.display = "block";
+			bj.style.height = height + 'px';
+			var bj2 = document.getElementById('bj2');
+			bj2.style.height = height + 'px';
+		}
+	</script>
+</head>
+
+<body id="main_body">
+	<div id="app">
+
+		<div style="position: fixed;top: 27%;text-align: center;width: 100%;z-index:100;left:0%;display: none;"
+			v-show="state==1"><img src="images/gif-.gif" style="width: 50%;opacity: 0.9;" /></div>
+
+		<div style="margin: 0%;padding: 0px;position: relative;z-index: 2;">
+			<!-- position: fixed;top:0; -->
+			<div style="position: fixed;top:0;margin: 0% 0% 4% 25%; text-align: center;width: 50%;padding-top: 10%;">
+
+				<div v-show="type=='0'"
+					style="height: 0.5rem;width: 100%;background-color: #163a44;border-radius: 0.35rem;border: solid 2px #207583;display: none;">
+					<div style="width: 50%;float: left;background-color: #207583;height: 100%;border-top-left-radius:0.35rem;border-top-right-radius:0rem;border-bottom-right-radius:0rem;border-bottom-left-radius:0.35rem;line-height: 0.6rem;"
+						@click="onType('0')">
+						<span style="color: #fff;">普通话</span>
+					</div>
+					<div style="width: 50%;float: left;line-height: 0.6rem;" @click="onType('1')">
+						<span style="color: #fff;">粤话</span>
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+
+				<div v-show="type=='1'"
+					style="height: 0.5rem;width: 100%;background-color: #163a44;border-radius: 0.35rem;border: solid 2px #207583;display: none;">
+					<div style="width: 50%;float: left;line-height: 0.6rem;" @click="onType('0')">
+						<span style="color: #fff;">普通话</span>
+					</div>
+					<div style="width: 50%;float: left;background-color: #207583;height: 100%;border-top-left-radius:0rem;border-top-right-radius:0.35rem;border-bottom-right-radius:0.35rem;border-bottom-left-radius:0rem;line-height: 0.6rem;"
+						@click="onType('1')">
+						<span style="color: #fff;">粤话</span>
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+
+
+			</div>
+
+			<!--匹配成功-->
+			<div v-show="step=='2'&&result!=null&&result.length>0"
+				style="z-index:5;text-align: left;width: 100%;padding-top: 14%;display: none;padding-top:30%">
+				<div style="width: 90%;border-radius: 8px;margin-left: 5%;background-color: #304958;overflow: hidden auto;height:51vh;">
+					<div style="color: #fff;width: 90%;padding-left: 5%;">
+						<div style="font-size: 0.40rem;padding-top: 10%;">匹配如下（点击跳转）：</div>
+						<div style="font-size: 0.26rem;padding-top: 4%;"> </div>
+						<div style="font-size: 0.33rem;padding-top: 6%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
+							v-for="(item,i) in result">
+							<a style="color: rgb(231, 222, 222);" :href="item.item_address">{{item.item_name}}</a>
+						</div>
+						<div style="font-size: 0.26rem;padding-top: 16%;"> </div>
+					</div>
+				</div>
+			</div>
+
+			<!--匹配失败-->
+			<div v-show="step=='2'&&result.length==0"
+				style="text-align: center;width: 100%;padding-top: 16%;display: none;padding-top:30%">
+				<div style="width: 90%;border-radius: 8px;margin-left: 5%;background-color: #304958;">
+					<div style="color: #fff;width: 100%;">
+						<div style="font-size: 0.36rem;padding-top: 16%;">无匹配到的内容</div>
+						<div v-show="text!=null&&text.length>0" style="font-size: 0.26rem;padding-top: 6%;">
+							识别内容：{{text}}</div>
+						<div style="font-size: 0.26rem;padding-top: 16%;"> </div>
+					</div>
+				</div>
+			</div>
+
+
+			<!--首页 margin-top: 20%;-->
+			<div v-show="step=='0'" style="display: none;padding-top:20%">
+				<div style="font-size: 0.26rem; padding-top: 6%;text-align: center;"> <span
+						style="font-size: 0.38rem;color: #fff;">请说出你要办理的事项</span> </div>
+				<div style="font-size: 0.26rem; padding-top: 10%;text-align: center;"> <span
+						style="font-size: 0.26rem;color: #fff;">房产</span> </div>
+				<div style="font-size: 0.26rem; padding-top: 6%;text-align: center;"> <span
+						style="font-size: 0.26rem;color: #fff;">驾驶证</span> </div>
+				<div style="font-size: 0.26rem; padding-top: 6%;text-align: center;"> <span
+						style="font-size: 0.26rem;color: #fff;">机动车</span> </div>
+				<div style="font-size: 0.26rem; padding-top: 6%;text-align: center;"> <span
+						style="font-size: 0.26rem;color: #fff;">身份证</span> </div>
+				<div style="font-size: 0.26rem; padding-top: 6%;text-align: center;"> <span
+						style="font-size: 0.26rem;color: #fff;">...</span> </div>
+			</div>
+
+		</div>
+
+		<!-- <div class="wrap-btn" style="text-align: center;position: absolute;width: 100%;bottom: 4.5%;z-index: 3; height: 200px;"> -->
+		<div class="wrap-btn" id="mkbtn" style="display: none;">
+			<div ref="wrap_btn" @touchstart="start" @touchend="end" @touchmove="move">
+				<img v-show="state==0" src="images/btn-new.png" style="width: 70%;display: none;" />
+				<img v-show="state==1" src="images/btn-new-.png" style="width: 70%;display: none;" />
+			</div>
+		</div>
+
+		<div class="fullscreen-bg">
+			<!-- <div>
+				
+			</div> -->
+			<img src="images/bg3.png" id="bj" style="width: 100%;display: none;">
+			<!-- <img src="images/bg.png" style="width: 100%;display: inline-block; border:1px solid green;"> -->
+		</div>
+
+		<!--加载中-->
+
+		<div v-show="step=='1'" id="jz_show"
+			style="position: absolute;z-index: 5;width: 100%;text-align: center;top: 30%;display: none;">
+			<img src="images/sb.png" style="width: 30%;">
+			<div style="padding-top: 6%;"><span style="color: #fff;font-size: 0.36rem;">正在识别</span></div>
+			<div style="padding-top: 6%;"><span style="color: #fff;font-size: 0.36rem;">...</span></div>
+		</div>
+		<div v-show="step=='1'" class="fullscreen-bg" style="z-index: 4;display: none;" id="jz_bj"><img
+				src="images/bg2.png" id="bj2" style="width: 100%;"></div>
+
+	</div>
+
+
+
+	<script src="https://res.wx.qq.com/open/js/jweixin-1.1.0.js"></script>
+	<script src="./js/items.js"></script>
+	<script src="./js/axios.min.js"></script>
+	<script src="./js/vue-dev.js"></script>
+	<script type="application/ecmascript">
+		var instance = axios.create({
+			baseURL: '/',
+			headers: {
+				'Content-Type': 'multipart/form-data'
+			}, //文件上传头
+			timeout: 100000
+		})
+
+
+		var post = axios.create({
+			baseURL: '/',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			timeout: 100000
+		})
+
+		var app = new Vue({
+			el: '#app',
+			data: {
+				state: 0, //按住开始录音
+				jssdk: JSON.parse('<%- JSON.stringify(jssdk)%>'),
+				localId: '',
+				media_id: '',
+				text: '',
+				items: items,
+				result: [],
+				step: '0', //0语音识别  1 识别中  2识别完成
+				type: '0', //0普通话 1粤语
+				textTwo: '',
+				textThree: '',
+				textFour: '',
+				illustrate: '',
+				illustrateTwo: '',
+				isSetTimeout: null,
+			},
+			mounted() {
+				wx.config(this.jssdk);
+
+				wx.ready(function () {
+
+					console.log('success')
+				});
+				const wrapBtn = this.$refs.wrap_btn
+				console.log(wrapBtn.clientHeight)
+				console.log(-(wrapBtn.clientWidth / 2))
+				wrapBtn.style.marginLeft = -(wrapBtn.clientWidth / 2) + 'px'
+				// wrapBtn.style.marginTop = -(wrapBtn.clientHeight/2) + 'px'
+				console.log(wrapBtn.clientHeight)
+				// this.getInfo()
+			},
+			methods: {
+				onType(type) {
+					this.type = type;
+				},
+				async getInfo(text) {
+					//  text = '机动车'
+					let data = await post.post('/', this.qs({
+						text
+					}))
+						.then(res => res).catch(err => err)
+					console.log(data);
+
+					this.result = data.data;
+					this.step = '2';
+				},
+				/* findInItems:function(str){
+                this.result = [];
+                for (var i = 0; i < this.items.length; i++) {
+                    var obj = this.items[i];
+                    if(obj.name.indexOf(str) > -1)
+                        this.result.push(obj);
+                }
+				this.step='2';
+			}, */
+				move(e) { //  松开结束录音
+					// e.preventDefault()
+					// console.log(event.targetTouches[0].pageY)
+					// if (event.targetTouches[0].pageY > 500) {
+					// 	console.log('松开结束')
+					// }else{
+
+					// 	this.end(e)
+					// }
+				},
+				start: function (e) { //开始录音
+					var that = this;
+					e.preventDefault();
+					console.log('*********start***********')
+					this.state = 1;
+					//console.log(e)
+					wx.startRecord({
+						success: function (res) {
+
+							var tempFilePath = res.tempFilePath
+							that.text = tempFilePath;
+							that.illustrate = '开始录音';
+							//that.isSetTimeout=true;
+						},
+						fail: function (res) {
+							//录音失败
+							that.illustrate = '录音失败';
+							return false;
+						}
+					})
+
+
+					//10秒自动结束
+					that.isSetTimeout = window.setTimeout(() => {
+						//录音中
+						if (that.state == 1 && that.step != '1') {
+							that.illustrateTwo = "今日2"
+							that.state = 0;
+							that.step = '1';
+							that.result = [];
+
+							wx.stopRecord({
+								success: function (res) {
+									//console.log(res);
+									that.localId = res.localId;
+									if (that.type == '0') {
+										//setTimeout(() => this.lastTwo(), 15000);
+										wx.translateVoice({
+											localId: res.localId, // 需要识别的音频的本地Id，由录音相关接口获得
+											isShowProgressTips: 0, // 默认为1，显示进度提示
+											success: function (res) {
+												that.illustrate = '语音识别成功';
+												that.state = 0;
+												that.illustrate = '语音识别成功--' + res.translateResult;
+												if (res.translateResult != null && res.translateResult != undefined) {
+													that.text = res.translateResult; // 语音识别的结果
+													if (that.text.length > 0) {
+														that.getInfo(that.text)
+														that.findInItems(that.text.substr(0, that.text.length - 1));
+													} else {
+														that.illustrate = '语音识别-没数据';
+														that.last();
+													}
+												} else {
+													that.illustrate = '语音识别-没数据~~';
+													that.last();
+												}
+
+											},
+											fail: function (res) {
+												that.illustrate = '语音识别失败';
+												that.last();
+												console.log("wx.stopRecord错误1,语音识别失败");
+											}
+										});
+									} else {
+										wx.uploadVoice({
+											localId: that.localId, // 需要上传的音频的本地ID，由stopRecord接口获得
+											isShowProgressTips: 0, // 默认为1，显示进度提示
+											success: function (res1) {
+
+												that.media_id = res1.serverId;
+												var media_id = res1.serverId
+												let query = {
+													media_id: media_id,
+												};
+												var url = '/upRid';
+												post.post(url, that.qs(query)).then(function (res2) {
+													that.textFour = res2.data.data.result
+													//that.textTwo=res2.data.data.result.err_no;
+													if (res2.data.code == '0' && res2.data.data != null && res2.data.data.result.result != null &&
+														res2.data.data.result.result.length > 0) {
+														//that.textTwo="进入1"
+														//that.textThree=res2.data.data.result;
+														// console.log(res2.data.data.result.result[0]);
+														that.textTwo = res2.data.data.result.err_no;
+														if (res2.data.data.result.err_no == 0) {
+															that.textTwo = res2.data.data.result.result[0];
+															var text = res2.data.data.result.result[0];
+															text = text.replace(
+																/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,
+																"");
+															that.text = text; // 语音识别的结果
+															that.getInfo(that.text)
+															// that.findInItems(text.substr(0,text.length - 1));
+														} else {
+															that.step = '2';
+														}
+													} else {
+														//that.textTwo="进入2"
+														if (that.step == '1') {
+															that.step = '2';
+														}
+													}
+
+												});
+
+											},
+											fail: function (res) {
+												alert(33333)
+												that.last();
+												console.log("wx.stopRecord错误,上传失败");
+											}
+										});
+									}
+								},
+								fail: function (res) {
+									that.last();
+									console.log("wx.stopRecord错误,录音失败");
+								}
+							});
+						}
+
+					}, 10000);
+				},
+				end: function (e) { //离开按钮触发事件
+					//this.isSetTimeout=false;
+					// 点击链接进入详情就变成真，真的就显示详情，假的就显示或不显示result列表
+					this.showInfo = this.showInfo ? !this.showInfo : this.showInfo;
+					clearTimeout(this.isSetTimeout)
+					if (this.state == 1 && this.step != '1') {
+						this.illustrateTwo = "今日1"
+						//return false;
+						this.step = '1';
+						//setTimeout(() => this.last(), 10000);
+						this.result = [];
+						e.preventDefault();
+						console.log('*********end***********')
+						this.state = 0;
+						//console.log(e)
+						var that = this;
+						wx.stopRecord({
+							success: function (res) {
+								that.illustrate = '停止录音';
+								// console.log(res,'结束录音并上传');
+								that.localId = res.localId;
+								if (that.type == '0') {
+									//setTimeout(() => this.lastTwo(), 15000);
+									wx.translateVoice({
+										localId: res.localId, // 需要识别的音频的本地Id，由录音相关接口获得
+										isShowProgressTips: 0, // 默认为1，显示进度提示
+										success: function (res) {
+											that.illustrate = '语音识别成功';
+											that.state = 0;
+											that.illustrate = '语音识别成功--' + res.translateResult;
+											if (res.translateResult != null && res.translateResult != undefined) {
+												that.text = res.translateResult; // 语音识别的结果
+												if (that.text.length > 0) {
+													that.getInfo(that.text)
+													//  that.findInItems(that.text.substr(0,that.text.length - 1));
+												} else {
+													that.illustrate = '语音识别-没数据';
+													that.last();
+												}
+											} else {
+												that.illustrate = '语音识别-没数据~~';
+												that.last();
+											}
+
+
+										},
+										fail: function (res) {
+											that.illustrate = '语音识别失败';
+											that.last();
+											console.log("wx.stopRecord错误,语音识别失败");
+										}
+									});
+								} else {
+									wx.uploadVoice({
+										localId: that.localId, // 需要上传的音频的本地ID，由stopRecord接口获得
+										isShowProgressTips: 0, // 默认为1，显示进度提示
+										success: function (res1) {
+
+											that.media_id = res1.serverId;
+											var media_id = res1.serverId
+											let query = {
+												media_id: media_id,
+											};
+
+											var url = '/upRid';
+											post.post(url, that.qs(query)).then(function (res2) {
+												that.textFour = res2.data.data.result
+												//that.textTwo=res2.data.data.result.err_no;
+												if (res2.data.code == '0' && res2.data.data != null && res2.data.data.result.result != null &&
+													res2.data.data.result.result.length > 0) {
+													//that.textTwo="进入1"
+													//that.textThree=res2.data.data.result;
+													// console.log(res2.data.data.result.result[0]);
+													that.textTwo = res2.data.data.result.err_no;
+													if (res2.data.data.result.err_no == 0) {
+														that.textTwo = res2.data.data.result.result[0];
+														var text = res2.data.data.result.result[0];
+														text = text.replace(
+															/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,
+															"");
+														that.text = text; // 语音识别的结果
+														that.getInfo(text)
+														// that.findInItems(text.substr(0,text.length - 1));
+													} else {
+														that.step = '2';
+													}
+												} else {
+													//that.textTwo="进入2"
+													if (that.step == '1') {
+														that.step = '2';
+													}
+												}
+
+											});
+
+										},
+										fail: function (res) {
+											that.last();
+											console.log("wx.stopRecord错误,录音失败");
+										}
+									});
+								}
+
+							},
+							fail: function (res) {
+								that.illustrate = '停止录音失败';
+								that.last();
+								console.log("wx.stopRecord错误,录音失败");
+							}
+						});
+					}
+
+				},
+
+				qs(obj) {
+					var res = '';
+					var i = 0;
+					for (var p in obj) {
+						res += p + '=' + obj[p] + '&';
+						i++;
+					}
+					return res.substr(0, res.length - 1);
+				},
+
+				last() {
+					//if(this.state==1){
+					//	return false;
+					//}
+					if (this.step == '1') {
+						this.step = '2';
+					}
+				},
+
+				lastTwo() {
+					if (this.step == '1') {
+						this.step = '2';
+					}
+				},
+
+				play: function () {
+					var that = this;
+					wx.playVoice({
+						localId: that.localId // 需要播放的音频的本地ID，由stopRecord接口获得
+					});
+				}
+			}
+		})
+	</script>
+</body>
+
+</html>
+
+</html>
+
+<style>
+	body {
+		font-size: 62.5%;
+		font-family: "Microsoft YaHei";
+		color: #2a3542;
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	.clear {
+		clear: both;
+	}
+
+	.content {
+		padding: 10px 15px 20px 15px;
+
+	}
+
+	.content .title {
+		font-size: 22px;
+		letter-spacing: 1px !important;
+		padding-top: 15px;
+		font-family: PingFangSC-Semibold;
+		color: #3f4146;
+		-webkit-letter-spacing: 0;
+		-moz-letter-spacing: 0;
+		-ms-letter-spacing: 0;
+		letter-spacing: 0;
+		line-height: 32px;
+		font-weight: 400;
+		/*text-align: center;*/
+	}
+
+	.content .time {
+		color: #888888;
+		font-size: 0.9rem;
+		/*text-align: center;*/
+		margin: 18px 0;
+	}
+
+	.content .main {
+		font-size: 1.1rem;
+		line-height: 30px;
+		letter-spacing: 1px;
+		margin-top: 5px;
+		color: #333333;
+	}
+
+	.content .pic_list {
+		margin-top: 10px;
+		padding: 15px 0;
+		width: 100%;
+		border-top: dashed 1px #dfdfdf;
+		border-bottom: dashed 1px #dfdfdf;
+	}
+
+	.content .pic_list .pic {
+		width: 8em;
+		height: 8em;
+		float: left;
+		background: #ddd;
+		margin-right: 5px;
+		margin-bottom: 5px;
+	}
+
+	.content .pic_list .pic img {
+		width: 100%;
+		height: 100%;
+	}
+
+	.pic_list .desc {
+		margin-bottom: 10px;
+		font-size: 1rem;
+	}
+
+	.pic_list .qty {
+		font-size: 0.8rem;
+		margin-left: 5px;
+		color: #888;
+	}
+
+	.content .att_list {
+		padding-top: 15px;
+
+	}
+
+	.att_list .desc {
+		margin-bottom: 10px;
+		font-size: 1rem;
+	}
+
+	.att_list .qty {
+		font-size: 0.8rem;
+		margin-left: 5px;
+		color: #888;
+	}
+
+	.att {
+		position: relative;
+		padding: 8px 5px 8px 63px;
+		height: 45px;
+		margin-bottom: 10px;
+		background-color: #f5f7fa;
+	}
+
+	.att img {
+		width: 45px;
+		height: 45px;
+		position: absolute;
+		left: 8px;
+		top: 7.5px;
+	}
+
+	.att .file_name {
+		padding-top: 1.5px;
+		font-size: 16px;
+		overflow: hidden;
+		word-break: keep-all;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.att .file_size {
+		font-size: 12px;
+		color: #888;
+	}
+
+	.content .end {
+		text-align: center;
+		color: #dfdfdf;
+		font-size: 0.8rem;
+		margin-top: 40px;
+		margin-bottom: 22px;
+	}
+
+	img {
+		pointer-events: none;
+		-webkit-pointer-events: none;
+		-ms-pointer-events: none;
+		-moz-pointer-events: none;
+	}
+</style>
