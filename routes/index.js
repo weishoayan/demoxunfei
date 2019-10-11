@@ -101,8 +101,8 @@ index.post('/',async (ctx) =>{
         }
         
     }
-    ctx.body = [{item_name:'没有数据库',item_address:'https://www.baidu.com'}]
-    // ctx.body = data
+    // ctx.body = [{item_name:'没有数据库',item_address:'https://www.baidu.com'}]
+    ctx.body = data
 })
 
 
@@ -301,13 +301,16 @@ index.get('query/queryitemkeys',async (ctx) =>{
 
 index.post('sub/nokeys',async (ctx)=>{
     const data = ctx.request.body
+    console.log(data)
     await query(`update b_nokeys set item_id='${data.item_id}' where id = ${data.id}`)
         .then(async res =>{
             await query(`insert into b_keys(item_id,key_name) values('${data.item_id}','${data.key_name}')`)
                 .then(res =>{
+                    console.log(res,1)
                     ctx.body = 0
                 })
         }).catch(err =>{
+            console.log(err,2)
             ctx.body = 1
         })
 })
